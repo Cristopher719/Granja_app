@@ -1,0 +1,16 @@
+PRUEBAS DE LAS REGLAS DE SEGURIDAD – GRANJA APP
+
+1. Copie esta carpeta "pruebas_reglas" dentro del proyecto, al lado de firestore.rules:
+   app_granja\firestore.rules
+   app_granja\pruebas_reglas\  (esta carpeta)
+
+2. En la terminal de VS Code:
+   cd pruebas_reglas
+   npm install
+   firebase emulators:exec --only firestore --project demo-granja "npm test"
+
+3. La primera vez descarga el emulador (unos segundos). Al final aparece un resumen:
+   # tests 37   # pass ...   # fail ...
+   Envíe una captura de ese resumen y de cualquier prueba que salga en rojo.
+
+No usa la base de datos real: el proyecto "demo-granja" solo existe en el emulador.

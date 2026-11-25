@@ -1,0 +1,197 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function datosUsuario() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function esAdministrador() {
+      return estaAutenticado() && datosUsuario().rol == 'administrador';
+    }
+
+    function esPropietario() {
+      return estaAutenticado() && datosUsuario().rol == 'propietario';
+    }
+
+    function esGalponero() {
+      return estaAutenticado() && datosUsuario().rol == 'galponero';
+    }
+
+    function esVendedor() {
+      return estaAutenticado() && datosUsuario().rol == 'vendedor';
+    }
+
+    function esBodeguero() {
+      return estaAutenticado() && datosUsuario().rol == 'bodeguero';
+    }
+
+    match /usuarios/{uid} {
+      allow read: if estaAutenticado() && (
+        request.auth.uid == uid ||
+        esAdministrador() ||
+        esPropietario()
+      );
+      allow create: if esAdministrador();
+      allow update: if (esAdministrador() &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['rol'])) ||
+        (request.auth.uid == uid &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['consentimiento_aceptado', 'fecha_consentimiento', 'version_politica']));
+      allow delete: if false;
+    }
+
+    match /galpones/{galponId} {
+      allow read: if estaAutenticado() && (
+        (esAdministrador() && resource.data.administrador_id == request.auth.uid) ||
+        resource.data.galponero_id == request.auth.uid ||
+        esPropietario() ||
+        esVendedor() ||
+        esBodeguero()
+      );
+      allow list: if estaAutenticado() && (
+        esAdministrador() ||
+        esPropietario() ||
+        esBodeguero() ||
+        esVendedor()
+      );
+      allow create: if esAdministrador() &&
+        request.resource.data.administrador_id == request.auth.uid;
+      allow update: if esAdministrador() &&
+        resource.data.administrador_id == request.auth.uid;
+      allow delete: if esAdministrador() && resource.data.es_demo == true &&
+        resource.data.administrador_id == request.auth.uid;
+
+      match /lotes_aves/{loteId} {
+        allow read: if estaAutenticado() && (
+          get(/databases/$(database)/documents/galpones/$(galponId)).data.administrador_id == request.auth.uid ||
+          get(/databases/$(database)/documents/galpones/$(galponId)).data.galponero_id == request.auth.uid ||
+          esPropietario() ||
+          esBodeguero()
+        );
+        allow create: if esAdministrador() &&
+          get(/databases/$(database)/documents/galpones/$(galponId)).data.administrador_id == request.auth.uid;
+        allow update: if esAdministrador() &&
+          get(/databases/$(database)/documents/galpones/$(galponId)).data.administrador_id == request.auth.uid;
+        allow delete: if esAdministrador() && resource.data.es_demo == true;
+
+        match /registros_diarios/{registroId} {
+          allow read: if estaAutenticado() && (
+            get(/databases/$(database)/documents/galpones/$(galponId)).data.administrador_id == request.auth.uid ||
+            get(/databases/$(database)/documents/galpones/$(galponId)).data.galponero_id == request.auth.uid ||
+            esPropietario() ||
+            esBodeguero()
+          );
+          allow create: if estaAutenticado() && (
+            get(/databases/$(database)/documents/galpones/$(galponId)).data.galponero_id == request.auth.uid ||
+            esAdministrador()
+          ) && request.resource.data.registrado_por == request.auth.uid;
+          allow update: if false;
+          allow delete: if esAdministrador() && resource.data.es_demo == true;
+        }
+
+        match /registros_sanitarios/{sanitarioId} {
+          allow read: if estaAutenticado() && (
+            get(/databases/$(database)/documents/galpones/$(galponId)).data.administrador_id == request.auth.uid ||
+            get(/databases/$(database)/documents/galpones/$(galponId)).data.galponero_id == request.auth.uid ||
+            esPropietario()
+          );
+          allow create: if estaAutenticado() && (
+            get(/databases/$(database)/documents/galpones/$(galponId)).data.galponero_id == request.auth.uid ||
+            esAdministrador()
+          ) && request.resource.data.registrado_por == request.auth.uid;
+          allow update: if false;
+          allow delete: if esAdministrador() && resource.data.es_demo == true;
+        }
+      }
+    }
+
+    match /clasificacion_huevos/{docId} {
+      allow read: if estaAutenticado() && (
+        esAdministrador() ||
+        esPropietario() ||
+        esBodeguero() ||
+        esVendedor()
+      );
+      allow list: if estaAutenticado() && (
+        esAdministrador() ||
+        esPropietario() ||
+        esBodeguero() ||
+        esVendedor()
+      );
+      allow create: if estaAutenticado() && (
+        esBodeguero() || esAdministrador()
+      ) && request.resource.data.bodeguero_id == request.auth.uid;
+      allow update: if false;
+      allow delete: if esAdministrador() && resource.data.es_demo == true;
+    }
+
+    match /ventas/{ventaId} {
+      allow read: if estaAutenticado() && (
+        esAdministrador() ||
+        esPropietario() ||
+        esBodeguero() ||
+        (esVendedor() && resource.data.vendedor_id == request.auth.uid)
+      );
+      allow list: if estaAutenticado() && (
+        esAdministrador() ||
+        esPropietario() ||
+        esBodeguero() ||
+        esVendedor()
+      );
+      allow create: if estaAutenticado() && (
+        esVendedor() || esAdministrador()
+      ) && request.resource.data.vendedor_id == request.auth.uid;
+      allow update: if false;
+      allow delete: if esAdministrador() && resource.data.es_demo == true;
+    }
+
+    match /inventario_alimento/{movId} {
+      allow read: if estaAutenticado() && (
+        esAdministrador() ||
+        esPropietario() ||
+        esBodeguero()
+      );
+      allow create: if estaAutenticado() && (
+        esBodeguero() || esAdministrador()
+      );
+      allow update: if false;
+      allow delete: if esAdministrador() && resource.data.es_demo == true;
+    }
+
+    function esDeMiOperacion(adminId) {
+      return (esAdministrador() && adminId == request.auth.uid) ||
+        ((esVendedor() || esPropietario()) && adminId == datosUsuario().creado_por);
+    }
+
+    match /clientes/{id} {
+      allow read: if estaAutenticado() && esDeMiOperacion(resource.data.admin_id);
+      allow create: if (esVendedor() || esAdministrador()) &&
+        esDeMiOperacion(request.resource.data.admin_id) &&
+        request.resource.data.creado_por == request.auth.uid;
+      allow update: if (esVendedor() || esAdministrador()) &&
+        esDeMiOperacion(resource.data.admin_id) &&
+        request.resource.data.admin_id == resource.data.admin_id;
+      allow delete: if (esVendedor() || esAdministrador()) &&
+        esDeMiOperacion(resource.data.admin_id);
+    }
+
+    match /metricas_desempeno/{id} {
+      allow create: if estaAutenticado() &&
+        request.resource.data.usuario_id == request.auth.uid;
+      allow read: if esAdministrador() || esPropietario();
+      allow update, delete: if false;
+    }
+
+    match /metricas_alertas/{id} {
+      allow create: if estaAutenticado() &&
+        request.resource.data.usuario_id == request.auth.uid;
+      allow read: if esAdministrador() || esPropietario();
+      allow update, delete: if false;
+    }
+  }
+}

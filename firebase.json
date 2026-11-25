@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "granja-app-1046e",
+          "appId": "1:313631680247:android:d82f33f8d58fcb574115f2",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "granja-app-1046e",
+          "configurations": {
+            "android": "1:313631680247:android:d82f33f8d58fcb574115f2",
+            "ios": "1:313631680247:ios:2c9a13c4e22323804115f2",
+            "macos": "1:313631680247:ios:2c9a13c4e22323804115f2",
+            "web": "1:313631680247:web:e49d6ff152dbbadf4115f2",
+            "windows": "1:313631680247:web:9c3c5cc4230bd3574115f2"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}

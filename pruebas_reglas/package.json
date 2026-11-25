@@ -1,0 +1,13 @@
+{
+  "name": "pruebas-reglas-granja-app",
+  "private": true,
+  "type": "module",
+  "description": "Pruebas de las reglas de seguridad de Cloud Firestore de Granja App en el emulador",
+  "scripts": {
+    "test": "node --test --test-reporter=spec reglas.test.js"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "^13.2.0"
+  }
+}

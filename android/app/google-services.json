@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "313631680247",
+    "project_id": "granja-app-1046e",
+    "storage_bucket": "granja-app-1046e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313631680247:android:d82f33f8d58fcb574115f2",
+        "android_client_info": {
+          "package_name": "com.example.app_granja"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuhDzXR7f8uZH2AkFGoOHijV2VGgws0O4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
